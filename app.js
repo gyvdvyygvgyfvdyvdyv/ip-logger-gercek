@@ -9,8 +9,8 @@ app.set('trust proxy', true);
 
 const logFile = path.join(__dirname, 'ziyaretciler.txt');
 
-// Rastgele gizli path (her seferinde değiştirebilirsin)
-const SECRET_PATH = '/x7k9p2m';   // ← Bunu istediğin gibi değiştir, çok bariz olmasın
+// Gizli path (istediğin gibi değiştir)
+const SECRET_PATH = '/x7k9p2m';
 
 function getClientIP(req) {
     let ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip;
@@ -31,10 +31,9 @@ app.get(SECRET_PATH, (req, res) => {
     try {
         fs.appendFileSync(logFile, log);
     } catch (e) {
-        console.log("Dosya yazma hatası (Render ücretsiz planda normal)");
+        console.log("Dosya yazma hatası");
     }
 
-    // Eğlenceli ve şık sayfa
     res.send(`
         <!DOCTYPE html>
         <html lang="tr">
@@ -97,9 +96,9 @@ app.get(SECRET_PATH, (req, res) => {
     `);
 });
 
-// Diğer yollara girerse 404 versin (gizliliği artırmak için)
-app.get('*', (req, res) => {
-    res.status(404).send('Not Found');
+// Catch-all route (DÜZELTİLDİ)
+app.use((req, res) => {
+    res.status(404).send('<h1>404 - Sayfa Bulunamadı</h1>');
 });
 
 app.listen(PORT, () => {
