@@ -8,9 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', true);
 
 const logFile = path.join(__dirname, 'ziyaretciler.txt');
-
-// Gizli path (istediğin gibi değiştir)
-const SECRET_PATH = '/x7k9p2m';
+const SECRET_PATH = '/check';   // ← Daha basit ve güvenli yaptım
 
 function getClientIP(req) {
     let ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip;
@@ -18,6 +16,7 @@ function getClientIP(req) {
     return ip || 'Bilinmiyor';
 }
 
+// Ana IP Logger Sayfası
 app.get(SECRET_PATH, (req, res) => {
     const ip = getClientIP(req);
     const time = new Date().toLocaleString('tr-TR');
@@ -30,9 +29,7 @@ app.get(SECRET_PATH, (req, res) => {
 
     try {
         fs.appendFileSync(logFile, log);
-    } catch (e) {
-        console.log("Dosya yazma hatası");
-    }
+    } catch (e) {}
 
     res.send(`
         <!DOCTYPE html>
@@ -43,64 +40,46 @@ app.get(SECRET_PATH, (req, res) => {
             <title>System Check</title>
             <script src="https://cdn.tailwindcss.com"></script>
             <style>
-                body {
-                    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-                    color: white;
-                    font-family: 'Segoe UI', sans-serif;
-                    min-height: 100vh;
-                }
-                .card {
-                    background: rgba(255,255,255,0.08);
-                    backdrop-filter: blur(12px);
-                    border: 1px solid rgba(255,255,255,0.1);
-                }
-                .glitch {
-                    animation: glitch 2s infinite;
-                }
+                body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: white; font-family: system-ui; min-height: 100vh; }
+                .card { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+                .glitch { animation: glitch 2s infinite; }
                 @keyframes glitch {
-                    0% { transform: translate(0); }
-                    20% { transform: translate(-2px, 2px); }
-                    40% { transform: translate(-2px, -2px); }
-                    60% { transform: translate(2px, 2px); }
-                    80% { transform: translate(2px, -2px); }
-                    100% { transform: translate(0); }
+                    0%,100% { transform: translate(0); }
+                    20% { transform: translate(-3px, 3px); }
+                    40% { transform: translate(3px, -3px); }
                 }
             </style>
         </head>
-        <body class="flex items-center justify-center">
-            <div class="card max-w-md w-full mx-4 p-8 rounded-3xl shadow-2xl">
-                <div class="text-center mb-6">
-                    <h1 class="text-4xl font-bold mb-2 glitch">🔍 SYSTEM CHECK</h1>
-                    <p class="text-purple-400">Bağlantı doğrulanıyor...</p>
+        <body class="flex items-center justify-center p-4">
+            <div class="card max-w-md w-full p-10 rounded-3xl text-center">
+                <h1 class="text-5xl font-bold mb-2 glitch">🔍 SYSTEM CHECK</h1>
+                <p class="text-purple-400 mb-6">Bağlantı doğrulanıyor...</p>
+                
+                <div class="bg-black/40 p-5 rounded-2xl mb-4">
+                    <p class="text-sm opacity-70">IP Adresin</p>
+                    <p class="text-3xl font-mono text-green-400 break-all">${ip}</p>
                 </div>
                 
-                <div class="space-y-4">
-                    <div class="bg-black/30 p-4 rounded-2xl">
-                        <p class="text-sm text-gray-400">IP Adresin</p>
-                        <p class="text-2xl font-mono text-green-400">${ip}</p>
-                    </div>
-                    
-                    <div class="bg-black/30 p-4 rounded-2xl">
-                        <p class="text-sm text-gray-400">Zaman</p>
-                        <p class="font-mono">${time}</p>
-                    </div>
-                </div>
-
-                <div class="mt-8 text-center">
-                    <p class="text-xs text-gray-500">• Seni bekliyorduk •</p>
-                    <div class="mt-4 text-5xl">😈</div>
-                </div>
+                <div class="text-sm opacity-70">${time}</div>
+                
+                <div class="mt-10 text-6xl">😈</div>
+                <p class="mt-2 text-xs opacity-50">Seni bekliyorduk...</p>
             </div>
         </body>
         </html>
     `);
 });
 
-// Catch-all route (DÜZELTİLDİ)
+// Root sayfaya girerse yönlendirsin
+app.get('/', (req, res) => {
+    res.send('<h1>Access Denied</h1><p>Wrong path.</p>');
+});
+
+// Diğer tüm yollar 404
 app.use((req, res) => {
-    res.status(404).send('<h1>404 - Sayfa Bulunamadı</h1>');
+    res.status(404).send('<h1>404</h1>');
 });
 
 app.listen(PORT, () => {
-    console.log(`✅ IP Logger aktif → http://localhost:${PORT}${SECRET_PATH}`);
+    console.log(`🚀 Aktif → ${SECRET_PATH}`);
 });
